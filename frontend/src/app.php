@@ -18,14 +18,16 @@ $app->register(new Silex\Provider\TwigServiceProvider(), array(
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 
-// Homepage
+### Homepage
 $app->get('/', function() use ($app) {
 	return $app['twig']->render('index.html.twig');
 });
 
-// Core functionality
+### Core functionality
 # Form
-$app->get('/input/{$type}', function($type = 'basic') use ($app) {
+$app->get('/input/{type}', function($type = 'basic') use ($app) {
+	// Check if basic form or some other
+	// Check whether to render partial (for jQuery) or full page
 	return $app['twig']->render('input.html.twig');
 });
 
@@ -41,7 +43,7 @@ $app->get('/result', function() use ($app) {
 	return $app['twig']->render('result.html.twig');
 });
 
-// Data control
+### Data control
 # Save data for later retrieval
 $app->get('/store/{email}', function($email) use ($app) {
 	// associate serialiazed data with e-mail, send confirmation e-mail

@@ -35,7 +35,7 @@ $app->get('/input/{type}', function($type = 'basic') use ($app) {
 $app->post('/process', function(Request $req) use ($app) {
 	// save data in central data object
 	// update serialization in DB associated with session_id
-	return $app->redirect('/result');
+	return $app->redirect('/result'); // or supply the result in some other way?
 });
 
 # Recommendation

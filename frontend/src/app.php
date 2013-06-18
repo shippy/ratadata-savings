@@ -61,7 +61,7 @@ $app->get('/input/{type}', function($type = 'basic') use ($app) {
 					array('label' => 'Dosavadní úspory',
 						  'currency' => 'CZK'))
 				 ->add('dividend', 'money',
-					array('label' => 'Žádaný měsíční důchod',
+					array('label' => 'Žádaný roční důchod',
 						  'currency' => 'CZK',
 						  'constraints' => new Assert\GreaterThan(array('value' => 0))));
 			break;

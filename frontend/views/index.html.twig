@@ -3,5 +3,5 @@
 {% block content %}
 <h2>Důchodová kalkulačka</h2>
 <p>Vypočtěte, kolik potřebujete uspořit, abyste si mohli důchod užit!</p>
-<p><a class="btn primary large" href="/input">Začněte tady!</a></p>
+<p><a class="btn primary large" href="{{ path('input', {type: 'basic'}) }}">Začněte tady!</a></p>
 {% endblock %}

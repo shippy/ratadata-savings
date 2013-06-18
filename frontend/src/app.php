@@ -8,52 +8,111 @@ require_once __DIR__.'/../vendor/autoload.php';
 $app = new Silex\Application();
 
 /* Services */
+use Silex\Provider\FormServiceProvider;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Validator\Constraints as Assert;
+
 $app->register(new Silex\Provider\TwigServiceProvider(), array(
     'twig.path' => __DIR__.'/../views',
 ));
+$app->register(new FormServiceProvider());
+$app->register(new Silex\Provider\ValidatorServiceProvider());
+$app->register(new Silex\Provider\SessionServiceProvider());
+$app->register(new Silex\Provider\UrlGeneratorServiceProvider());
 
 /* Models */
 
 /* Controllers */
-use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Response;
 
 ### Homepage
+$app->get('/hello/{name}', function ($name) use ($app) {
+    return 'Hello '.$app->escape($name);
+});
+
 $app->get('/', function() use ($app) {
+	return $app['twig']->render('index.html.twig');
+})->bind('home');
+
+$app->get('/home', function() use ($app) {
 	return $app['twig']->render('index.html.twig');
 });
 
 ### Core functionality
 # Form
 $app->get('/input/{type}', function($type = 'basic') use ($app) {
-	// Check if basic form or some other
-	// Check whether to render partial (for jQuery) or full page
-	return $app['twig']->render('input.html.twig');
-});
+	$form = $app['form.factory']->createBuilder('form')
+		->setAction($app['url_generator']->generate('process', array('type' => $type)))
+		->setMethod('POST');
+	$form->add('age_current', 'integer', 
+			array('label' => 'Současný věk', 'constraints' => new Assert\NotBlank()))
+		 ->add('age_retirement', 'integer',
+			array('label' => 'Věk odchodu do důchodu')) # 'constraints' => array(new Assert\NotBlank(), new Assert\GreaterThan('age_current'))))
+		 ->add('age_terminal', 'integer', array('label' => 'Konečný věk'))
+		 ->add('savings', 'money', array('label' => 'Dosavadní úspory', 'currency' => 'CZK'))
+		 ->add('dividend', 'money', array('label' => 'Žádaný měsíční důchod', 'currency' => 'CZK'));
+	// // Check what fields to render
+	// switch ($type) {
+	// 	case 'basic':
+	// 		$form->add('age_current', 'integer', 
+	// 				array('label' => 'Současný věk', 'constraints' => new Assert\NotBlank()))
+	// 			 ->add('age_retirement', 'integer',
+	// 				array('label' => 'Věk odchodu do důchodu')) # 'constraints' => array(new Assert\NotBlank(), new Assert\GreaterThan('age_current'))))
+	// 			 ->add('age_terminal', 'integer', array('label' => 'Konečný věk'))
+	// 			 ->add('savings', 'money', array('label' => 'Dosavadní úspory', 'currency' => 'CZK'))
+	// 			 ->add('dividend', 'money', array('label' => 'Žádaný měsíční důchod', 'currency' => 'CZK'));
+	// 		break;
+	// 	case 'life':
+	// 		# code...
+	// 		break;
+	// 	case 'money':
+	// 		# code...
+	// 		break;
+	// 	default:
+	// 		return $app->redirect('/');
+	// 		break;
+	// }
+	
+	// TODO: Check whether to render partial (for jQuery) or full page
+	$form = $form->getForm();
+	return $app['twig']->render('input.html.twig', array('form' => $form->createView()));
+})->bind('input');
 
 # Processing
-$app->post('/process', function(Request $req) use ($app) {
+$app->post('/process/{type}', function($type = 'basic', Request $req) use ($app) {
 	// save data in central data object
 	// update serialization in DB associated with session_id
 	return $app->redirect('/result'); // or supply the result in some other way?
-});
+})->bind('process');
 
 # Recommendation
+use Savings\Calculator;
 $app->get('/result', function() use ($app) {
+	// $terminal_age_expected = getTerminalAge($data);
+	
 	return $app['twig']->render('result.html.twig');
-});
+})->bind('result');
 
 ### Data control
 # Save data for later retrieval
 $app->get('/store/{email}', function($email) use ($app) {
 	// associate serialiazed data with e-mail, send confirmation e-mail
 	return false;
-});
+})->bind('store');
 
 # Clear data association
 $app->get('/clear', function() use ($app) {
 	// clean data from central data object (but not anonymized DB)
 	// generate new session ID
 	return $app->redirect('/input');
-});
+})->bind('clear');
+
+### Meta
+$app->get('/methodology', function() use ($app) {
+	return $app['twig']->render('methodology.html.twig');
+})->bind('methodology');
+
+$app->get('/sources', function() use ($app) {
+	return $app['twig']->render('sources.html.twig');
+})->bind('sources');
 ?>

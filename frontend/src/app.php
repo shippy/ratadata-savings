@@ -26,17 +26,9 @@ $app->register(new Silex\Provider\UrlGeneratorServiceProvider());
 /* Controllers */
 
 ### Homepage
-$app->get('/hello/{name}', function ($name) use ($app) {
-    return 'Hello '.$app->escape($name);
-});
-
 $app->get('/', function() use ($app) {
 	return $app['twig']->render('index.html.twig');
 })->bind('home');
-
-$app->get('/home', function() use ($app) {
-	return $app['twig']->render('index.html.twig');
-});
 
 ### Core functionality
 # Form

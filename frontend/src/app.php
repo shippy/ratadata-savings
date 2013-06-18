@@ -36,7 +36,7 @@ $app->get('/', function() use ($app) {
 ### Core functionality
 # Form input
 $app->get('/input/{type}', function($type = 'basic') use ($app) {
-	$form = $app['form.factory']->createBuilder('form', $app['session']->get('data')->all())
+	$form = $app['form.factory']->createBuilder('form', $app['session']->get('data'))
 		->setAction($app['url_generator']->generate('process', array('type' => $type)))
 		->setMethod('POST');
 	// Check what fields to render
@@ -86,19 +86,25 @@ $app->get('/input/{type}', function($type = 'basic') use ($app) {
 # Processing
 $app->post('/process/{type}', function($type = 'basic', Request $req) use ($app) {
 	// save data into session
-	// TODO: validate $req->request
-	$app['session']->set('data', $req->request);
-	
+	// TODO: validate $req->request->get('form')
+	if ($app['session']->has('data')) {
+		$app['session']->set('data', array_merge($app['session']->get('data'), $req->request->get('form')));
+	} else {
+		$app['session']->set('data', $req->request->get('form'));
+	}
 	// TODO: update serialization in DB associated with session_id
-	return $app->redirect('/input/basic'); // or supply the result in some other way?
+	return $app->redirect('/result'); // or supply the result in some other way?
 })->bind('process');
 
 # Recommendation
+require_once 'calculator.php';
 use Savings\Calculator;
 $app->get('/result', function() use ($app) {
 	// $terminal_age_expected = getTerminalAge($data);
+	$data = $app['session']->get('data');
 	
-	return $app['twig']->render('result.html.twig');
+	$save = Savings\Calculator\getYearlySavings($data);
+	return $app['twig']->render('result.html.twig', array('save' => $save));
 })->bind('result');
 
 ### Data control

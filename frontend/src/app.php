@@ -16,6 +16,9 @@ use Symfony\Component\Validator\Constraints as Assert;
 $app->register(new Silex\Provider\TwigServiceProvider(), array(
     'twig.path' => __DIR__.'/../views',
 ));
+$app->register(new Silex\Provider\TranslationServiceProvider(), array(
+    'translator.messages' => array(),
+)); // TODO: investigate
 $app->register(new FormServiceProvider());
 $app->register(new Silex\Provider\ValidatorServiceProvider());
 $app->register(new Silex\Provider\SessionServiceProvider());
@@ -66,7 +69,7 @@ $app->get('/input/{type}', function($type = 'basic') use ($app) {
 	// }
 	
 	// TODO: Check whether to render partial (for jQuery) or full page
-	$form = $form->getForm();
+	$form = $form->getForm(); // factory, not setter
 	return $app['twig']->render('input.html.twig', array('form' => $form->createView()));
 })->bind('input');
 
@@ -99,12 +102,14 @@ $app->get('/clear', function() use ($app) {
 	return $app->redirect('/input');
 })->bind('clear');
 
-### Meta
-$app->get('/methodology', function() use ($app) {
-	return $app['twig']->render('methodology.html.twig');
-})->bind('methodology');
+### Meta (static pages)
+$static = array('methodology' => '/methodology',
+				'sources' => '/sources',
+				'authors' => '/authors');
 
-$app->get('/sources', function() use ($app) {
-	return $app['twig']->render('sources.html.twig');
-})->bind('sources');
+foreach ($static as $page => $path) {
+	$app->get($path, function() use ($app) {
+		return $app['twig']->render($page.'.html.twig');
+	})->bind($page);
+}
 ?>

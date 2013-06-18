@@ -39,34 +39,28 @@ $app->get('/input/{type}', function($type = 'basic') use ($app) {
 	$form = $app['form.factory']->createBuilder('form')
 		->setAction($app['url_generator']->generate('process', array('type' => $type)))
 		->setMethod('POST');
-	$form->add('age_current', 'integer', 
-			array('label' => 'Současný věk', 'constraints' => new Assert\NotBlank()))
-		 ->add('age_retirement', 'integer',
-			array('label' => 'Věk odchodu do důchodu')) # 'constraints' => array(new Assert\NotBlank(), new Assert\GreaterThan('age_current'))))
-		 ->add('age_terminal', 'integer', array('label' => 'Konečný věk'))
-		 ->add('savings', 'money', array('label' => 'Dosavadní úspory', 'currency' => 'CZK'))
-		 ->add('dividend', 'money', array('label' => 'Žádaný měsíční důchod', 'currency' => 'CZK'));
-	// // Check what fields to render
-	// switch ($type) {
-	// 	case 'basic':
-	// 		$form->add('age_current', 'integer', 
-	// 				array('label' => 'Současný věk', 'constraints' => new Assert\NotBlank()))
-	// 			 ->add('age_retirement', 'integer',
-	// 				array('label' => 'Věk odchodu do důchodu')) # 'constraints' => array(new Assert\NotBlank(), new Assert\GreaterThan('age_current'))))
-	// 			 ->add('age_terminal', 'integer', array('label' => 'Konečný věk'))
-	// 			 ->add('savings', 'money', array('label' => 'Dosavadní úspory', 'currency' => 'CZK'))
-	// 			 ->add('dividend', 'money', array('label' => 'Žádaný měsíční důchod', 'currency' => 'CZK'));
-	// 		break;
-	// 	case 'life':
-	// 		# code...
-	// 		break;
-	// 	case 'money':
-	// 		# code...
-	// 		break;
-	// 	default:
-	// 		return $app->redirect('/');
-	// 		break;
-	// }
+	// Check what fields to render
+	switch ($type) {
+		case 'basic':
+			$form->add('age_current', 'integer', 
+					array('label' => 'Současný věk', 'constraints' => new Assert\NotBlank()))
+				 ->add('age_retirement', 'integer',
+					array('label' => 'Věk odchodu do důchodu')) # 'constraints' => array(new Assert\NotBlank(), new Assert\GreaterThan('age_current'))))
+				 ->add('age_terminal', 'integer', array('label' => 'Konečný věk'))
+				 ->add('savings', 'money', array('label' => 'Dosavadní úspory', 'currency' => 'CZK'))
+				 ->add('dividend', 'money', array('label' => 'Žádaný měsíční důchod', 'currency' => 'CZK'));
+			break;
+		case 'life':
+			break;
+		case 'money':
+			$form->add('income')
+				 ->add('occupation')
+				 ->add('industry');
+			break;
+		default:
+			return $app->redirect('/');
+			break;
+	}
 	
 	// TODO: Check whether to render partial (for jQuery) or full page
 	$form = $form->getForm(); // factory, not setter

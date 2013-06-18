@@ -34,7 +34,7 @@ $app->get('/', function() use ($app) {
 })->bind('home');
 
 ### Core functionality
-# Form
+# Form input
 $app->get('/input/{type}', function($type = 'basic') use ($app) {
 	$form = $app['form.factory']->createBuilder('form')
 		->setAction($app['url_generator']->generate('process', array('type' => $type)))
@@ -43,12 +43,27 @@ $app->get('/input/{type}', function($type = 'basic') use ($app) {
 	switch ($type) {
 		case 'basic':
 			$form->add('age_current', 'integer', 
-					array('label' => 'Současný věk', 'constraints' => new Assert\NotBlank()))
+					array('label' => 'Současný věk',
+						  'constraints' => new Assert\NotBlank()))
 				 ->add('age_retirement', 'integer',
-					array('label' => 'Věk odchodu do důchodu')) # 'constraints' => array(new Assert\NotBlank(), new Assert\GreaterThan('age_current'))))
-				 ->add('age_terminal', 'integer', array('label' => 'Konečný věk'))
-				 ->add('savings', 'money', array('label' => 'Dosavadní úspory', 'currency' => 'CZK'))
-				 ->add('dividend', 'money', array('label' => 'Žádaný měsíční důchod', 'currency' => 'CZK'));
+					array('label' => 'Věk odchodu do důchodu',
+						  'constraints' => array(
+							new Assert\NotBlank(),
+							# new Assert\GreaterThan('age_current')
+							)))
+				 ->add('age_terminal', 'integer',
+					array('label' => 'Konečný věk',
+						  'constraints' => array(
+							new Assert\NotBlank(),
+							# new Assert\GreaterThan('age_retirement')
+							)))
+				 ->add('savings', 'money',
+					array('label' => 'Dosavadní úspory',
+						  'currency' => 'CZK'))
+				 ->add('dividend', 'money',
+					array('label' => 'Žádaný měsíční důchod',
+						  'currency' => 'CZK',
+						  'constraints' => new Assert\GreaterThan(0)));
 			break;
 		case 'life':
 			break;
@@ -69,8 +84,11 @@ $app->get('/input/{type}', function($type = 'basic') use ($app) {
 
 # Processing
 $app->post('/process/{type}', function($type = 'basic', Request $req) use ($app) {
-	// save data in central data object
-	// update serialization in DB associated with session_id
+	// save data into session
+	// TODO: validate $req->request
+	$app['session']->set('data', $req->request);
+	
+	// TODO: update serialization in DB associated with session_id
 	return $app->redirect('/result'); // or supply the result in some other way?
 })->bind('process');
 

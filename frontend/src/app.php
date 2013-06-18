@@ -36,7 +36,7 @@ $app->get('/', function() use ($app) {
 ### Core functionality
 # Form input
 $app->get('/input/{type}', function($type = 'basic') use ($app) {
-	$form = $app['form.factory']->createBuilder('form')
+	$form = $app['form.factory']->createBuilder('form', $app['session']->get('data')->all())
 		->setAction($app['url_generator']->generate('process', array('type' => $type)))
 		->setMethod('POST');
 	// Check what fields to render
@@ -63,7 +63,7 @@ $app->get('/input/{type}', function($type = 'basic') use ($app) {
 				 ->add('dividend', 'money',
 					array('label' => 'Žádaný měsíční důchod',
 						  'currency' => 'CZK',
-						  'constraints' => new Assert\GreaterThan(0)));
+						  'constraints' => new Assert\GreaterThan(array('value' => 0))));
 			break;
 		case 'life':
 			break;
@@ -78,6 +78,7 @@ $app->get('/input/{type}', function($type = 'basic') use ($app) {
 	}
 	
 	// TODO: Check whether to render partial (for jQuery) or full page
+	$form->add('Odeslat', 'submit');
 	$form = $form->getForm(); // factory, not setter
 	return $app['twig']->render('input.html.twig', array('form' => $form->createView()));
 })->bind('input');
@@ -89,7 +90,7 @@ $app->post('/process/{type}', function($type = 'basic', Request $req) use ($app)
 	$app['session']->set('data', $req->request);
 	
 	// TODO: update serialization in DB associated with session_id
-	return $app->redirect('/result'); // or supply the result in some other way?
+	return $app->redirect('/input/basic'); // or supply the result in some other way?
 })->bind('process');
 
 # Recommendation

@@ -1,5 +1,5 @@
 <?php
-namespace Variables;
+namespace Savings;
 
 class All {
 	private $fields, $contexts;

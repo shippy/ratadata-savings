@@ -1,5 +1,5 @@
 <?php
-namespace Savings\Calculator;
+namespace Savings;
 
 /* formula: from \big(\frac{1+s}{1+i}\big)^{12(R-a)}S
 			+ \sum_{j={12a}}^{12R} x\big(\frac{1+s}{1+i}\big)^{j-12a}

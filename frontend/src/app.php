@@ -98,12 +98,12 @@ $app->post('/process/{type}', function($type = 'basic', Request $req) use ($app)
 
 # Recommendation
 require_once 'calculator.php';
-use Savings\Calculator;
+use Savings;
 $app->get('/result', function() use ($app) {
 	// $terminal_age_expected = getTerminalAge($data);
 	$data = $app['session']->get('data');
 	
-	$save = Savings\Calculator\getYearlySavings($data);
+	$save = Savings\getYearlySavings($data);
 	return $app['twig']->render('result.html.twig', array('save' => $save));
 })->bind('result');
 

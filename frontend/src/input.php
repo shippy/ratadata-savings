@@ -1,44 +1,58 @@
 <?php
-namespace Inputs;
+namespace Variables;
 
-class Collection {
-	private $session;
-	private $inputs;
+class All {
+	private $fields, $contexts;
+}
+
+class Context {
+	private $name;
+	private $fields;
 	
-	public setSession($session) {
-		$this->session = $session;
-	}
-	
-	public setInput(\Inputs\Input $input) {
-		$this->inputs[$input->getName] = $input;
-	}
-	
-	public getInput($inputName) {
-		return $this->inputs[$inputName];
-	}
-	
-	public delInput($inputName) {
-		if (isset($this->inputs[$inputName])) {
-			unset($this->inputs[$inputName]);
-			return true;
-		} else {
-			return false;
+	function getDefaults() {
+		foreach ($fields as $field) {
+			$return[$field->get('name')] = $field->get('default');
 		}
 	}
 }
 
-class Input {
-	private $content, // user input
-			$name, // input name
-			$validation, // validation rule
+class Field {
+	private $name, // form name
+			$type, // of field in form
+			$label, // in Czech label
+			$default,
+			$formProperties, // array of other properties
+			$constraints, // validation rules
+			$context, // what form to put this in
 			$why, // rationale for collecting datapoint
 			$connections; // datasets referenced by this question
 	
-	function __construct($foo = null) {
-		$this->foo = $foo;
+	function __construct($array) {
+		$vars = array_keys(get_class_vars($this));
+		foreach ($array as $key => $value) {
+			if (in_array($key, $vars)) {
+				$this->$key = $value;
+			}
+		}
+	}
+	
+	function get($var) {
+		$vars = array_keys(get_class_vars($this));
+		if (in_array($var, $vars)) {
+			return $this->$var;
+		} else {
+			return false;
+		}
+	}
+	
+	function addToForm(&$form) {
+		$form->add(
+			$name, $type, array_merge(array(
+				'label' => $label,
+				'constraints' => $constraints
+			), $formProperties)
+		);
 	}
 }
-
-class Datapoint
 
 ?>

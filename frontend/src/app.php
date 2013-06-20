@@ -4,7 +4,7 @@
 # Prettify
 
 /* Setup */
-require_once __DIR__.'/../vendor/autoload.php';
+$loader = require_once __DIR__.'/../vendor/autoload.php';
 $app = new Silex\Application();
 
 /* Services */
@@ -97,13 +97,12 @@ $app->post('/process/{type}', function($type = 'basic', Request $req) use ($app)
 })->bind('process');
 
 # Recommendation
-require_once 'calculator.php';
-use Savings;
+require_once 'Savings/calculator.php'; // TODO: Autoload
 $app->get('/result', function() use ($app) {
 	// $terminal_age_expected = getTerminalAge($data);
 	$data = $app['session']->get('data');
 	
-	$save = Savings\getYearlySavings($data);
+	$save = Savings\Calculator::getYearlySavings($data);
 	return $app['twig']->render('result.html.twig', array('save' => $save));
 })->bind('result');
 
